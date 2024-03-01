@@ -1,6 +1,8 @@
 const btnContainer = document.getElementById("btn-container");
 const newsContainer = document.getElementById("news-container");
 const newsPlaceholder = document.getElementById("news-placeholder");
+const todaysPickBtn = document.getElementById("todays-pick-btn");
+const trendingBtn = document.getElementById("trending-btn");
 
 let categoryId = "08";
 //change active button color
@@ -31,18 +33,29 @@ const loadCategoryButton = async () => {
   });
 };
 
-const displayNews = async (categoryId) => {
+const displayNews = async (categoryId, isTodaysPick,isTrending) => {
   const res = await fetch(
     `https://openapi.programming-hero.com/api/news/category/${categoryId}`
   );
   const data = await res.json();
-  const newsCategories = data.data;
+  let newsCategories = data.data;
   newsContainer.innerHTML = "";
   //show placeholder when news not available
   if (newsCategories.length === 0) {
     newsPlaceholder.classList.remove("hidden");
   } else {
     newsPlaceholder.classList.add("hidden");
+  }
+  // handle todays pick news
+  if (isTodaysPick) {
+    newsCategories = newsCategories.filter(
+      (category) => category?.others_info?.is_todays_pick
+    );
+  }
+  else if(isTrending) {
+    newsCategories = newsCategories.filter(
+      (category) => category?.others_info?.is_trending
+    );
   }
   newsCategories.forEach((news) => {
     const div = document.createElement("div");
@@ -130,5 +143,14 @@ const displayNews = async (categoryId) => {
   });
 };
 
-displayNews(categoryId);
+todaysPickBtn.addEventListener("click", function () {
+  displayNews(categoryId, true,false);
+});
+
+trendingBtn.addEventListener('click',()=>{
+    displayNews(categoryId,false,true)
+})
+
+displayNews(categoryId, false,false);
 loadCategoryButton();
+
