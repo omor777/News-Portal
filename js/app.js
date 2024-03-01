@@ -3,7 +3,7 @@ const newsContainer = document.getElementById("news-container");
 const newsPlaceholder = document.getElementById("news-placeholder");
 
 let categoryId = "08";
-
+//change active button color
 const loadCategoryButton = async () => {
   const res = await fetch(
     `https://openapi.programming-hero.com/api/news/categories`
@@ -12,12 +12,20 @@ const loadCategoryButton = async () => {
   const categories = data.data.news_category;
   categories.forEach((category) => {
     const newButton = document.createElement("button");
-    newButton.classList = `text-lg  font-semibold ${
+    newButton.classList = `text-lg duration-500 font-semibold ${
       category.category_name === "All News" ? "text-primary" : "text-black/50"
     }`;
     newButton.innerText = category.category_name;
-    newButton.addEventListener("click", () => {
+    newButton.addEventListener("click", (e) => {
       displayNews(category.category_id);
+      //handle active button color
+      const categoryButtons = btnContainer.querySelectorAll("button");
+      categoryButtons.forEach((btn) => {
+        btn.classList.remove("text-primary");
+        btn.classList.add("text-black/50");
+      });
+      e.currentTarget.classList.add("text-primary");
+      e.currentTarget.classList.remove("text-black/50");
     });
     btnContainer.appendChild(newButton);
   });
@@ -30,6 +38,7 @@ const displayNews = async (categoryId) => {
   const data = await res.json();
   const newsCategories = data.data;
   newsContainer.innerHTML = "";
+  //show placeholder when news not available
   if (newsCategories.length === 0) {
     newsPlaceholder.classList.remove("hidden");
   } else {
