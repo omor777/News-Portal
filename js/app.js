@@ -4,6 +4,7 @@ const newsPlaceholder = document.getElementById("news-placeholder");
 const todaysPickBtn = document.getElementById("todays-pick-btn");
 const trendingBtn = document.getElementById("trending-btn");
 
+//global variable
 let categoryId = "08";
 //change active button color
 const loadCategoryButton = async () => {
@@ -19,7 +20,7 @@ const loadCategoryButton = async () => {
     }`;
     newButton.innerText = category.category_name;
     newButton.addEventListener("click", (e) => {
-      displayNews(category.category_id);
+      displayNews(category.category_id, null, null, category.category_name);
       //handle active button color
       const categoryButtons = btnContainer.querySelectorAll("button");
       categoryButtons.forEach((btn) => {
@@ -33,26 +34,43 @@ const loadCategoryButton = async () => {
   });
 };
 
-const displayNews = async (categoryId, isTodaysPick,isTrending) => {
+/**
+ *
+ * @param {Array} category
+ * @param {String} categoryName
+ */
+const showTotalCategoryAndName = (category, name = "All News") => {
+  document.getElementById("total-item").innerText = category.length;
+  document.getElementById("category-name").innerText = name;
+};
+
+const displayNews = async (...args) => {
+  console.log(args);
+  const [categoryId, isTodaysPick, isTrending, categoryName] = args;
+
   const res = await fetch(
     `https://openapi.programming-hero.com/api/news/category/${categoryId}`
   );
   const data = await res.json();
   let newsCategories = data.data;
+
   newsContainer.innerHTML = "";
+
+  //show category name and total category
+  showTotalCategoryAndName(newsCategories, categoryName);
+
   //show placeholder when news not available
   if (newsCategories.length === 0) {
     newsPlaceholder.classList.remove("hidden");
   } else {
     newsPlaceholder.classList.add("hidden");
   }
-  // handle todays pick news
+  // handle todays pick news and trending news
   if (isTodaysPick) {
     newsCategories = newsCategories.filter(
       (category) => category?.others_info?.is_todays_pick
     );
-  }
-  else if(isTrending) {
+  } else if (isTrending) {
     newsCategories = newsCategories.filter(
       (category) => category?.others_info?.is_trending
     );
@@ -144,13 +162,13 @@ const displayNews = async (categoryId, isTodaysPick,isTrending) => {
 };
 
 todaysPickBtn.addEventListener("click", function () {
-  displayNews(categoryId, true,false);
+  displayNews(categoryId, true);
 });
 
-trendingBtn.addEventListener('click',()=>{
-    displayNews(categoryId,false,true)
-})
+trendingBtn.addEventListener("click", () => {
+  displayNews(categoryId, null, true);
+});
 
-displayNews(categoryId, false,false);
+displayNews(categoryId);
 loadCategoryButton();
 
