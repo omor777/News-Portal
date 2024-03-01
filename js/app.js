@@ -1,5 +1,6 @@
 const btnContainer = document.getElementById("btn-container");
 const newsContainer = document.getElementById("news-container");
+const newsPlaceholder = document.getElementById("news-placeholder");
 
 let categoryId = "08";
 
@@ -11,8 +12,13 @@ const loadCategoryButton = async () => {
   const categories = data.data.news_category;
   categories.forEach((category) => {
     const newButton = document.createElement("button");
-    newButton.classList = `text-lg text-black/50`;
+    newButton.classList = `text-lg  font-semibold ${
+      category.category_name === "All News" ? "text-primary" : "text-black/50"
+    }`;
     newButton.innerText = category.category_name;
+    newButton.addEventListener("click", () => {
+      displayNews(category.category_id);
+    });
     btnContainer.appendChild(newButton);
   });
 };
@@ -23,6 +29,12 @@ const displayNews = async (categoryId) => {
   );
   const data = await res.json();
   const newsCategories = data.data;
+  newsContainer.innerHTML = "";
+  if (newsCategories.length === 0) {
+    newsPlaceholder.classList.remove("hidden");
+  } else {
+    newsPlaceholder.classList.add("hidden");
+  }
   newsCategories.forEach((news) => {
     const div = document.createElement("div");
     div.innerHTML = `
@@ -45,7 +57,7 @@ const displayNews = async (categoryId) => {
        ${news.details.slice(0, 250)}
       </p>
       <p class="text-black/70 mt-3">
-       ${news.details.slice(250,500)}
+       ${news.details.slice(250, 500)}
       </p>
       <div class="flex items-center justify-between mt-5">
         <div class="grid grid-cols-[auto_1fr] gap-3">
@@ -53,9 +65,9 @@ const displayNews = async (categoryId) => {
             news?.author?.img
           }" />
           <div>
-            <h4>${news?.author?.name ?? 'Not Available!'}</h4>
+            <h4>${news?.author?.name ?? "Not Available!"}</h4>
             <time class="text-sm capitalize text-[#718797]"
-              >${news?.author?.published_date ?? 'Not Available!'}</time
+              >${news?.author?.published_date ?? "Not Available!"}</time
             >
           </div>
         </div>
@@ -111,4 +123,3 @@ const displayNews = async (categoryId) => {
 
 displayNews(categoryId);
 loadCategoryButton();
-
